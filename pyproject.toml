@@ -1,0 +1,19 @@
+[project]
+name = "wot-strats"
+version = "0.1.0"
+description = "World of Tanks strat reference: type a map name, see that map's slide from each imported StratSketch strat."
+requires-python = ">=3.11"
+dependencies = ["pywebview>=6"]
+
+[project.scripts]
+wot-strats = "strats.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["strats"]
+
+[tool.setuptools.package-data]
+strats = ["extract.js", "page.template.html", "static/icon*"]

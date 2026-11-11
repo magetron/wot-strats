@@ -1,0 +1,9 @@
+# Fetched or built by the app, not source: imported strats, map images, the built page
+data/
+maps/
+index.html
+
+.venv/
+__pycache__/
+*.egg-info/
+*.lnk
