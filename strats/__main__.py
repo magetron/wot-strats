@@ -34,6 +34,8 @@ def main():
     sub.add_parser("build", help="rebuild index.html from data/")
     sub.add_parser("shortcut", help="(re)create the shortcut in the project folder")
     args = p.parse_args(sys.argv[1:] or ["app"])  # double-clicking the packaged exe opens the app
+    from .paths import unblock_bundle
+    unblock_bundle()  # before anything loads .NET
 
     if args.cmd == "app":
         from .window import main as run_window

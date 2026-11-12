@@ -207,4 +207,6 @@ def main():
         _run()
     except Exception:
         log(traceback.format_exc())
-        user32.MessageBoxW(None, f"WoT Strats couldn't open. See {LOG}", TITLE, 0x10)
+        hint = (" If you unzipped a downloaded copy: right-click the zip, Properties, tick Unblock, "
+                "then unzip it again." if FROZEN else "")
+        user32.MessageBoxW(None, f"WoT Strats couldn't open. See {LOG}{hint}", TITLE, 0x10)

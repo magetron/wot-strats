@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -19,3 +20,17 @@ FONTS = BUNDLE / "fonts"
 INDEX = ROOT / "index.html"          # the built page; the app window shows this
 LOG = DATA / "strats.log"
 SITE = "https://stratsketch.com"
+
+
+def unblock_bundle():
+    """Files unzipped from a downloaded zip carry Windows' "came from the internet" mark (a Zone.Identifier
+    stream), and .NET refuses to load DLLs that have it, so the window can't start ("Failed to resolve
+    Python.Runtime.Loader.Initialize"). Remove the mark from the packaged app's own program files."""
+    if not FROZEN:
+        return
+    for path in BUNDLE.rglob("*"):
+        if path.suffix.lower() in (".dll", ".pyd", ".exe"):
+            try:
+                os.remove(f"{path}:Zone.Identifier")
+            except OSError:
+                pass  # no mark on this file, or the folder is read-only
