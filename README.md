@@ -13,9 +13,13 @@ StratSketch slides are untitled and have no per-slide link, which is why this ex
 
 ## Download
 
-Get `WoT-Strats-<version>.zip` from [Releases](https://github.com/magetron/wot-strats/releases), unzip it somewhere
-you can write to, and run `WoT Strats.exe`. No Python needed. The zip holds only the app; your strats and their map
-images are saved beside the exe as you import links.
+Get `WoT-Strats-Setup-<version>.exe` from [Releases](https://github.com/magetron/wot-strats/releases) and run it.
+No Python and no admin rights needed. It installs for your Windows account (`%LOCALAPPDATA%\Programs\WoT Strats`),
+adds a Start menu shortcut, and opens the app. Your strats and their map images are saved in `%LOCALAPPDATA%\WoT Strats`
+as you import links.
+
+To remove it, use Windows' installed apps (Settings > Apps) and pick WoT Strats: it asks whether to delete your strats
+and maps too. Renamed to anything without "Setup" in it, the same exe runs as a portable app with no install.
 
 ## Set up from source
 
@@ -36,7 +40,9 @@ Windows only (Edge WebView2, through pywebview). Imported strats, map images and
 .venv\Scripts\python tools/release.py
 ```
 
-Writes `dist/WoT-Strats-<version>.zip` (PyInstaller; version from `pyproject.toml`). Everything stays in this folder.
+Writes `dist/WoT-Strats-Setup-<version>.exe` (PyInstaller; version from `strats/__init__.py`). Check it with
+`.venv\Scripts\python tools/check_setup.py`, which installs, imports a strat and uninstalls with every folder redirected
+under `build/`. Everything stays in this folder.
 
 ## How it works
 

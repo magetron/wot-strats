@@ -4,9 +4,20 @@ from pathlib import Path
 
 FROZEN = getattr(sys, "frozen", False)   # running as the packaged exe (PyInstaller)
 if FROZEN:
-    BUNDLE = Path(sys._MEIPASS)          # read-only files shipped inside the package
+    BUNDLE = Path(sys._MEIPASS)          # read-only files shipped inside the exe
     PKG = BUNDLE / "strats"
-    ROOT = Path(sys.executable).parent   # the unzipped folder: strats, maps and the built page live beside the exe
+    # Where the packaged app keeps strats, maps and the built page, first match wins:
+    #   WOT_STRATS_HOME            an explicit folder (used to test a build without touching real app data)
+    #   the exe's own folder       if it already holds strats (a 0.1 folder, which kept them beside the exe)
+    #   %LOCALAPPDATA%\WoT Strats  the normal place
+    _beside = Path(sys.executable).parent
+    if os.environ.get("WOT_STRATS_HOME"):
+        ROOT = Path(os.environ["WOT_STRATS_HOME"])
+    elif (_beside / "data" / "strats.json").exists():
+        ROOT = _beside
+    else:
+        ROOT = Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local") / "WoT Strats"
+    ROOT.mkdir(parents=True, exist_ok=True)
 else:
     PKG = Path(__file__).resolve().parent
     BUNDLE = ROOT = PKG.parent           # the repo folder

@@ -13,7 +13,12 @@ on-page instructions unless he asks. Keep replies short.
   scene-graph nodes). Check an import against StratSketch's own drawing after changing it.
 - To see the real window without clicking through it: start the app with `STRATS_SELFTEST=<link>` set and it submits
   its own Add form; the result lands in `data/strats.log`.
-- Release: `python tools/release.py` builds `dist/WoT-Strats-<version>.zip` (PyInstaller exe). Packaged, `paths.py`
-  reads its files from the bundle and writes data/maps/index.html beside the exe. Test a build by unzipping under
-  `build/` and running it with `STRATS_SELFTEST=<link>`; close the normal app first (one instance at a time).
+- Release: bump `strats/__init__.py`, then `python tools/release.py` builds `dist/WoT-Strats-Setup-<version>.exe`: one
+  PyInstaller exe that is the app and its own per-user installer (`strats/install.py`; named "...Setup..." it installs,
+  `uninstall` removes). Packaged, `paths.py` reads its files from the bundle and keeps data/maps/index.html in
+  `%LOCALAPPDATA%\WoT Strats` (or beside the exe if strats are already there, as 0.1 did). Run from source,
+  everything stays in this folder.
+- Before publishing run `python tools/check_setup.py`: it installs, imports and uninstalls with `LOCALAPPDATA`,
+  `APPDATA`, `TEMP` redirected under `build/`, a spare port (`WOT_STRATS_PORT`) so the normal app can stay open, the
+  exe marked as downloaded (what broke 0.1.0), and its own registry entry (`WOT_STRATS_REGKEY`).
 - Keep installs, caches, builds and test copies inside this folder (`.venv`, `build/`, `dist/`); nothing global.

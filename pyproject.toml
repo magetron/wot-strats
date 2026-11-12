@@ -1,6 +1,6 @@
 [project]
 name = "wot-strats"
-version = "0.1.1"
+dynamic = ["version"]  # strats/__init__.py
 description = "World of Tanks strat reference: type a map name, see that map's slide from each imported StratSketch strat."
 requires-python = ">=3.11"
 dependencies = ["pywebview>=6"]
@@ -17,6 +17,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["strats"]
+
+[tool.setuptools.dynamic]
+version = {attr = "strats.__version__"}
 
 [tool.setuptools.package-data]
 strats = ["extract.js", "page.template.html", "static/icon*"]

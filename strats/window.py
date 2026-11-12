@@ -19,12 +19,15 @@ from .paths import DATA, FROZEN, INDEX, LOG, PKG, ROOT
 
 TITLE = "WoT Strats"
 APP_ID = "WoTStrats"  # the taskbar groups and pins by this, so the shortcut and the window must both carry it
-HOST, PORT = "127.0.0.1", 54331
+HOST = "127.0.0.1"
+PORT = int(os.environ.get("WOT_STRATS_PORT", 54331))  # another port lets a test copy run beside the real app
 ICON = PKG / "static" / "icon.ico"
 PYTHONW = Path(sys.executable).with_name("pythonw.exe")
 # how to start the app again: the exe itself when packaged, otherwise pythonw -m strats app
 LAUNCH_TARGET, LAUNCH_ARGS = (Path(sys.executable), "") if FROZEN else (PYTHONW, "-m strats app")
 SHORTCUT = ROOT / "WoT Strats.lnk"
+# packaged, the icon file sits in a temp folder that changes every run, so shortcuts and the taskbar use the exe's own
+ICON_REF = f"{sys.executable},0" if FROZEN else f"{ICON},0"
 BACKGROUND = "#0c1012"
 
 kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -70,24 +73,27 @@ def _set_relaunch(hwnd):
         ID: APP_ID,
         RELAUNCH_COMMAND: f'"{LAUNCH_TARGET}" {LAUNCH_ARGS}'.strip(),
         RELAUNCH_NAME: TITLE,
-        RELAUNCH_ICON: f"{ICON},0",
+        RELAUNCH_ICON: ICON_REF,
     })
 
 
-def make_shortcut():
-    """(Re)create the shortcut in the project folder, carrying the same identity as the window."""
-    make = (f'$s = (New-Object -ComObject WScript.Shell).CreateShortcut("{SHORTCUT}"); $s.TargetPath = "{LAUNCH_TARGET}"; '
-            f'$s.Arguments = "{LAUNCH_ARGS}"; $s.WorkingDirectory = "{ROOT}"; $s.IconLocation = "{ICON},0"; $s.Save()')
-    subprocess.run(["powershell", "-NoProfile", "-Command", make], check=True)
+def make_shortcut(shortcut=SHORTCUT, target=LAUNCH_TARGET, args=LAUNCH_ARGS, folder=ROOT, icon=ICON_REF):
+    """(Re)create a shortcut to the app (by default the one in the project folder), carrying the same identity
+    as the window so the taskbar treats them as one."""
+    shortcut = Path(shortcut)
+    shortcut.parent.mkdir(parents=True, exist_ok=True)
+    make = (f'$s = (New-Object -ComObject WScript.Shell).CreateShortcut("{shortcut}"); $s.TargetPath = "{target}"; '
+            f'$s.Arguments = "{args}"; $s.WorkingDirectory = "{folder}"; $s.IconLocation = "{icon}"; $s.Save()')
+    subprocess.run(["powershell", "-NoProfile", "-Command", make], check=True, creationflags=0x08000000)  # no console flash
     ole32.CoInitialize(None)
     store = c_void_p()
     get_store = shell32.SHGetPropertyStoreFromParsingName
     get_store.argtypes = [ctypes.c_wchar_p, c_void_p, ctypes.c_int, c_void_p, POINTER(c_void_p)]
-    result = get_store(str(SHORTCUT), None, 2, byref(IID_PROPERTY_STORE), byref(store))  # 2 = read and write
+    result = get_store(str(shortcut), None, 2, byref(IID_PROPERTY_STORE), byref(store))  # 2 = read and write
     if result < 0:
-        raise OSError(f"couldn't open {SHORTCUT}: {result:#x}")
+        raise OSError(f"couldn't open {shortcut}: {result:#x}")
     _write_properties(store, {ID: APP_ID})
-    return str(SHORTCUT)
+    return str(shortcut)
 
 
 def _already_open() -> bool:
