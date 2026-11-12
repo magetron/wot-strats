@@ -7,3 +7,7 @@ index.html
 __pycache__/
 *.egg-info/
 *.lnk
+
+# release builds (python tools/release.py)
+build/
+dist/

@@ -11,7 +11,13 @@ StratSketch slides are untitled and have no per-slide link, which is why this ex
 - Type a map name anywhere; `1`–`9` switch strat; scroll or `+` `−` zoom, drag to pan, `0` fits.
 - **Strats…** (top right): paste a StratSketch link to import it, or refresh, rename, reorder and remove strats.
 
-## Set up on a new PC
+## Download
+
+Get `WoT-Strats-<version>.zip` from [Releases](https://github.com/magetron/wot-strats/releases), unzip it somewhere
+you can write to, and run `WoT Strats.exe`. No Python needed. The zip holds only the app; your strats and their map
+images are saved beside the exe as you import links.
+
+## Set up from source
 
 ```
 python -m venv .venv
@@ -22,6 +28,15 @@ python -m venv .venv
 
 Windows only (Edge WebView2, through pywebview). Imported strats, map images and the built page (`data/`, `maps/`,
 `index.html`) are not in the repo: importing a link fetches what it needs.
+
+## Build a release
+
+```
+.venv\Scripts\python -m pip install --no-cache-dir -e .[release]
+.venv\Scripts\python tools/release.py
+```
+
+Writes `dist/WoT-Strats-<version>.zip` (PyInstaller; version from `pyproject.toml`). Everything stays in this folder.
 
 ## How it works
 

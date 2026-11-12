@@ -15,13 +15,15 @@ from pathlib import Path
 
 from . import importer
 from .build import build
-from .paths import DATA, INDEX, LOG, PKG, ROOT
+from .paths import DATA, FROZEN, INDEX, LOG, PKG, ROOT
 
 TITLE = "WoT Strats"
 APP_ID = "WoTStrats"  # the taskbar groups and pins by this, so the shortcut and the window must both carry it
 HOST, PORT = "127.0.0.1", 54331
 ICON = PKG / "static" / "icon.ico"
 PYTHONW = Path(sys.executable).with_name("pythonw.exe")
+# how to start the app again: the exe itself when packaged, otherwise pythonw -m strats app
+LAUNCH_TARGET, LAUNCH_ARGS = (Path(sys.executable), "") if FROZEN else (PYTHONW, "-m strats app")
 SHORTCUT = ROOT / "WoT Strats.lnk"
 BACKGROUND = "#0c1012"
 
@@ -66,7 +68,7 @@ def _set_relaunch(hwnd):
     shell32.SHGetPropertyStoreForWindow(c_void_p(hwnd), byref(IID_PROPERTY_STORE), byref(store))
     _write_properties(store, {
         ID: APP_ID,
-        RELAUNCH_COMMAND: f'"{PYTHONW}" -m strats app',
+        RELAUNCH_COMMAND: f'"{LAUNCH_TARGET}" {LAUNCH_ARGS}'.strip(),
         RELAUNCH_NAME: TITLE,
         RELAUNCH_ICON: f"{ICON},0",
     })
@@ -74,8 +76,8 @@ def _set_relaunch(hwnd):
 
 def make_shortcut():
     """(Re)create the shortcut in the project folder, carrying the same identity as the window."""
-    make = (f'$s = (New-Object -ComObject WScript.Shell).CreateShortcut("{SHORTCUT}"); $s.TargetPath = "{PYTHONW}"; '
-            f'$s.Arguments = "-m strats app"; $s.WorkingDirectory = "{ROOT}"; $s.IconLocation = "{ICON},0"; $s.Save()')
+    make = (f'$s = (New-Object -ComObject WScript.Shell).CreateShortcut("{SHORTCUT}"); $s.TargetPath = "{LAUNCH_TARGET}"; '
+            f'$s.Arguments = "{LAUNCH_ARGS}"; $s.WorkingDirectory = "{ROOT}"; $s.IconLocation = "{ICON},0"; $s.Save()')
     subprocess.run(["powershell", "-NoProfile", "-Command", make], check=True)
     ole32.CoInitialize(None)
     store = c_void_p()
